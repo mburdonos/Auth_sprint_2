@@ -1,0 +1,20 @@
+FROM python:3.10
+
+WORKDIR /opt/app
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+COPY entrypoint.sh entrypoint.sh
+COPY requirements.txt requirements.txt
+COPY db.sqlite db.sqlite
+
+RUN  apt-get -q update \
+     && apt-get -qy install netcat \
+     && pip install --upgrade pip \
+     && pip install -r requirements.txt
+
+COPY sqlite_to_postgres sqlite_to_postgres
+COPY ./movies_admin .
+
+ENTRYPOINT ["sh", "entrypoint.sh"]

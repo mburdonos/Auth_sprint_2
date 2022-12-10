@@ -1,0 +1,41 @@
+version: '3'
+services:
+  db:
+    image: postgres:13
+    restart: always
+    container_name: postgres
+    volumes:
+      - ./flask_app/database/data/:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: qwe
+      POSTGRES_USER: app
+      POSTGRES_DB: movies_database
+
+  cache:
+    container_name: redis
+    image: redis
+    hostname: redis
+    restart: always
+
+  auth_api:
+    build:
+      context: ./flask_app/
+      dockerfile: DockerFile
+    container_name: auth_api
+    depends_on:
+      - db
+      - cache
+    env_file:
+      - ./flask_app/.env
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - auth_api
+    ports:
+      - "80:80"

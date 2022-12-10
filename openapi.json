@@ -1,0 +1,773 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "API аутентификации",
+    "description": "Информация о пользователях, правах и ролях. Регистрация, вход и выход из акаунта",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/register": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Регистрация пользователя",
+        "description": "Создание нового пользователя",
+        "operationId": "register_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Users"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Статус создания пользователя, перекидывает на точку авторизации",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Вход пользователя",
+        "description": "Аутентификация пользователя",
+        "operationId": "register_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Input",
+                "type": "object",
+                "default": {
+                  "login": "login",
+                  "password": "qwerty"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Возвращает словарь из access and refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Выход пользователя",
+        "description": "Удаление токена из редис",
+        "operationId": "register_logout_post",
+        "responses": {
+          "200": {
+            "description": "Статус команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout/all": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Выход пользователей",
+        "description": "Удаление токенов из редис",
+        "operationId": "register_logout_all_post",
+        "responses": {
+          "200": {
+            "description": "Статус команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Обновление access and refresh token",
+        "operationId": "register_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Возвращает словарь из access and refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change_password": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Заменя старого пароля на новый",
+        "operationId": "register_change_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Input",
+                "type": "object",
+                "default": {
+                  "old_password": "admin",
+                  "new_password": "admin1",
+                  "confirm_new_password": "admin1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Получение всех пользователей",
+        "description": "Получение всех пользователей",
+        "operationId": "register_users_get",
+        "responses": {
+          "200": {
+            "description": "Список пользователей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/history": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Получение истории входа для текущего опользователя",
+        "operationId": "register_users_history_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Size",
+              "type": "integer"
+            },
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Number",
+              "type": "integer"
+            },
+            "name": "number",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список пользователей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_name}/assign_role": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Добавить роль для пользователя",
+        "operationId": "register_users__user_name__assign_role_post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Name",
+              "type": "string"
+            },
+            "name": "user_name",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "New Role",
+                "type": "object",
+                "default": {
+                  "name_role": "admin"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус выполнения",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_name}/remove_role": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Удалить роль для пользователя",
+        "operationId": "register_users__user_name__remove_role_post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            },
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "New Role",
+                "type": "object",
+                "default": {
+                  "name_role": "admin"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус выполнения",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roles": {
+      "get": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Получение всех ролей",
+        "description": "Получение всех ролей",
+        "operationId": "register_roles_get",
+        "responses": {
+          "200": {
+            "description": "Список ролей",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roles/roles/create": {
+      "post": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Создать роль",
+        "operationId": "register_roles_roles_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Input",
+                "type": "object",
+                "default": {
+                  "name": "test"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус выполнения команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roles/roles/update": {
+      "put": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Обновить роль",
+        "operationId": "register_roles_roles_update_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Input",
+                "type": "object",
+                "default": {
+                  "old_role": "test",
+                  "new_role": "test1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус выполнения команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roles/roles/delete": {
+      "delete": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Удалить роль",
+        "operationId": "register_roles_roles_delete_delete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Input",
+                "type": "object",
+                "default": {
+                  "name": "test"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус выполнения команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/permissions": {
+      "get": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Получение всех разрешений",
+        "operationId": "register_permissions_get",
+        "responses": {
+          "200": {
+            "description": "Список разрешений",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/permissions/{permission_id}": {
+      "get": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Получение конкретного разрешения",
+        "operationId": "register_permissions__permission_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Permission Id",
+              "type": "string"
+            },
+            "name": "permission_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Получаю разрешение",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Записать разрешения",
+        "operationId": "register_permissions__permission_id__put",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Permission Id",
+              "type": "string"
+            },
+            "name": "permission_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Статус выполнения команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Удаление разрешения",
+        "operationId": "register_permissions__permission_id__delete",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Permission Id",
+              "type": "string"
+            },
+            "name": "permission_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Статус выполнения команды",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "Users": {
+        "title": "Users",
+        "required": [
+          "login",
+          "password",
+          "email",
+          "first_name",
+          "last_name"
+        ],
+        "type": "object",
+        "properties": {
+          "login": {
+            "title": "Login",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "first_name": {
+            "title": "First Name",
+            "type": "string"
+          },
+          "last_name": {
+            "title": "Last Name",
+            "type": "string"
+          }
+        }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
