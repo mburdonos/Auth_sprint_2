@@ -1,23 +1,17 @@
-from datetime import datetime, timedelta
 from http import HTTPStatus
-from json import dumps, loads
+from json import loads
+from urllib.parse import urlencode
 
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
-    get_jwt,
-    get_jwt_identity,
-    jwt_required,
-    set_access_cookies,
-    unset_jwt_cookies,
-)
+from flask import Blueprint, jsonify, redirect, request
+from flask_jwt_extended import (get_jwt_identity, jwt_required,
+                                unset_jwt_cookies)
+from requests import get, post
 
 from core.cache_conf import cache_client
-from models.devices import Devices
-from models.history import History
+from core.config import configs
+from models.socialaccount import SocialAccount
 from models.users import Users
-from utils.auth_utils import check_roles
+from utils.auth_utils import check_roles, login_process
 
 login = Blueprint("login", __name__)
 
@@ -27,8 +21,8 @@ def register():
     """Регистрация нового пользователя"""
 
     user = Users(**loads(request.data))
-    if user.login and user.password:
-        if user.get_first_raw({"login": user.login}):
+    if (user.login or user.email) and user.password:
+        if user.get_user_by_universal_login(login=user.login, email=user.email):
             return jsonify({"msg": "login exist"}), HTTPStatus.UNAUTHORIZED
         else:
             user.hash_password()
@@ -40,53 +34,81 @@ def register():
         return jsonify({"msg": "login or password is empty"}), HTTPStatus.UNAUTHORIZED
 
 
+@login.route("/register/<source>", methods=["POST"])
+def register_source(source):
+    """Регистрация нового пользователя через yandex"""
+
+    user = Users(**loads(request.data))
+
+    if user.get_user_by_universal_login(login=user.login, email=user.email):
+        return jsonify({"msg": "this account exist"}), HTTPStatus.UNAUTHORIZED
+    user.generate_random_password()
+    user.save_to_storage()
+    user_bd = user.get_first_raw({"login": user.login})
+    if SocialAccount().get_first_raw({"user_id": str(user_bd.id)}):
+        return (
+            jsonify({"msg": "this account with source exist "}),
+            HTTPStatus.UNAUTHORIZED,
+        )
+    SocialAccount(user_id=user_bd.id, social_name=source).save_to_storage()
+    return jsonify({"msg": "create user successful"}), HTTPStatus.OK
+
+
 @login.route("/login", methods=["POST"])
 def log_in():
     login_user = Users(**loads(request.data))
-    etalone_user = login_user.get_first_raw({"login": login_user.login})
+    etalone_user = login_user.get_user_by_universal_login(
+        login=login_user.login, email=login_user.email
+    )
     if etalone_user:
         if etalone_user.check_password(login_user.password):
-
-            login_device = Devices(name=request.user_agent.string)
-            if not login_device.get_first_raw({"name": login_device.name}):
-                login_device.save_to_storage()
-            else:
-                login_device = login_device.get_first_raw({"name": login_device.name})
-
-            History(
-                user_id=etalone_user.id, device_id=login_device.id
-            ).save_to_storage()
-
-            additional_claims = {
-                "user": login_user.login,
-                "roles": [role.name for role in etalone_user.role.all()],
-            }
-            ret = {
-                "access_token": create_access_token(
-                    identity=login_user.login, additional_claims=additional_claims
-                ),
-                "refresh_token": create_refresh_token(
-                    identity=login_user.login, additional_claims=additional_claims
-                ),
-            }
-
-            response = jsonify(ret)
-            access_token = ret["access_token"]
-
-            current_date = datetime.now()
-            ret["datetime_create_token"] = current_date.strftime("%Y-%m-%d %H:%M:%S")
-            ret["datetime_end_token"] = (current_date + timedelta(hours=1)).strftime(
-                "%Y-%m-%d %H:%M:%S"
+            return login_process(
+                etalone_user=etalone_user, device_name=request.user_agent.string
             )
-            ret["roles"] = [role.name for role in etalone_user.role.all()]
-            ret["is_superuser"] = etalone_user.is_superuser
-            cache_client.set(login_user.login, dumps(ret))
 
-            set_access_cookies(response, access_token)
-
-            return response, HTTPStatus.OK
         return jsonify({"msg": "not valid password"}), HTTPStatus.UNAUTHORIZED
     return jsonify({"msg": "not valid login"}), HTTPStatus.UNAUTHORIZED
+
+
+@login.route("/login/yandex", methods=["GET", "POST"])
+def log_in_source():
+    if request.args.get("code", False):
+        data = {
+            "grant_type": "authorization_code",
+            "code": request.args.get("code"),
+            "client_id": configs.yandex_client_id,
+            "client_secret": configs.yandex_client_secret,
+        }
+        data = urlencode(data)
+        return_data = post(configs.yandex_baseurl + "token", data).json()
+
+        user_info_response = get(
+            url=configs.yandex_info_url + "info",
+            params={"jwt_secret": configs.yandex_client_secret},
+            headers={"Authorization": f"OAuth {return_data.get('access_token')}"},
+        )
+        user_info = loads(user_info_response.text)
+        device_name = user_info_response.request.headers.get("User-Agent")
+
+        etalone_user = Users().get_user_by_universal_login(
+            login=user_info.get("login"), email=user_info.get("default_email")
+        )
+        if etalone_user:
+            return login_process(
+                etalone_user=etalone_user,
+                device_name=device_name,
+                access_token=return_data.get("access_token"),
+                refresh_token=return_data.get("refresh_token"),
+            )
+        return jsonify({"msg": "User not found"}), HTTPStatus.UNAUTHORIZED
+    else:
+        return redirect(
+            configs.yandex_baseurl
+            + "authorize?response_type=code&client_id={}".format(
+                configs.yandex_client_id
+            )
+        )
+        # return configs.yandex_baseurl + "authorize?response_type=code&client_id={}".format(configs.yandex_client_id)
 
 
 @login.route("/logout", methods=["POST"])
@@ -114,32 +136,7 @@ def refresh():
     user = Users().get_first_raw({"login": identity})
     get_cache_data = loads(cache_client.get(user.login))
     if get_cache_data["refresh_token"]:
-        additional_claims = {
-            "user": user.login,
-            "roles": [role.name for role in user.role.all()],
-        }
-        ret = {
-            "access_token": create_access_token(
-                identity=user.login, additional_claims=additional_claims
-            ),
-            "refresh_token": create_refresh_token(
-                identity=user.login, additional_claims=additional_claims
-            ),
-        }
-        # get_cache_data["refresh_token"]
-        response = jsonify(ret)
-
-        current_date = datetime.now()
-        ret["datetime_create_token"] = current_date.strftime("%Y-%m-%d %H:%M:%S")
-        ret["datetime_end_token"] = (current_date + timedelta(hours=1)).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-        ret["roles"] = [role.name for role in user.role.all()]
-        ret["is_superuser"] = user.is_superuser
-        cache_client.set(user.login, dumps(ret))
-
-        set_access_cookies(response, ret["access_token"])
-        return response, HTTPStatus.OK
+        return login_process(etalone_user=user)
 
 
 @login.route("/change_password", methods=["POST"])

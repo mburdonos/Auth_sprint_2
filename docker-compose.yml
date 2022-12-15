@@ -1,9 +1,9 @@
 version: '3'
 services:
-  db:
+  auth_db:
     image: postgres:13
     restart: always
-    container_name: postgres
+    container_name: auth_db
     volumes:
       - ./flask_app/database/data/:/var/lib/postgresql/data
     environment:
@@ -11,10 +11,10 @@ services:
       POSTGRES_USER: app
       POSTGRES_DB: movies_database
 
-  cache:
-    container_name: redis
+  auth_cache:
+    container_name: auth_cache
     image: redis
-    hostname: redis
+    hostname: auth_cache
     restart: always
 
   auth_api:
@@ -23,8 +23,8 @@ services:
       dockerfile: DockerFile
     container_name: auth_api
     depends_on:
-      - db
-      - cache
+      - auth_db
+      - auth_cache
     env_file:
       - ./flask_app/.env
     restart: always
@@ -39,3 +39,14 @@ services:
       - auth_api
     ports:
       - "80:80"
+    restart: always
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - 6831:6831/udp
+      - 16686:16686
+    depends_on:
+      - nginx
+    restart: always
