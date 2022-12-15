@@ -48,9 +48,9 @@ async def shutdown():
         logging.info("closed elasticsearch connection.")
 
 
-app.include_router(films.router, prefix="/api/v1/films", tags=["Поиск по фильмам"])
-app.include_router(genres.router, prefix="/api/v1/genres", tags=["Поиск по жанрам"])
-app.include_router(persons.router, prefix="/api/v1/persons", tags=["Поиск по людям"])
+app.include_router(films.router, prefix="/api/v1/movies/films", tags=["Поиск по фильмам"])
+app.include_router(genres.router, prefix="/api/v1/movies/genres", tags=["Поиск по жанрам"])
+app.include_router(persons.router, prefix="/api/v1/movies/persons", tags=["Поиск по людям"])
 
 if __name__ == "__main__":
     uvicorn.run(

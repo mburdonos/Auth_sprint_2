@@ -5,6 +5,7 @@ import psycopg2
 
 from core.config import configs
 
+
 if __name__ == "__main__":
     time.sleep(90)
     while True:

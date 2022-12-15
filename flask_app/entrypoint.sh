@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-python .\utils\pg_wait.py
+python pg_wait.py
 
-python .\utils\redis_wait.py
+python redis_wait.py
 
 alembic revision --message="initial" --autogenerate
 

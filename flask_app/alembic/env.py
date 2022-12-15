@@ -14,6 +14,7 @@ from models.user_role import UserRole
 from models.devices import Devices
 from models.role_permission import RolePermission
 from models.history import History
+from models.socialaccount import SocialAccount
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -34,7 +35,8 @@ target_metadata = db.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", f"{configs.storage_driver}://{configs.pg_user}:{configs.pg_password}@{configs.pg_host}/{configs.pg_database}")
+connections = f"{configs.storage_driver}://{configs.pg_user}:{configs.pg_password}@{configs.pg_host}/{configs.pg_database}"
+config.set_main_option("sqlalchemy.url", connections)
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

@@ -26,7 +26,7 @@
         },
         "responses": {
           "200": {
-            "description": "Статус создания пользователя, перекидывает на точку авторизации",
+            "description": "Статус создания пользователя",
             "content": {
               "application/json": {
                 "schema": {
@@ -48,13 +48,80 @@
         }
       }
     },
+    "/register/yandex": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Регистрация пользователя по профилю в яндекс",
+        "description": "Создание нового пользователя по профилю в яндекс",
+        "operationId": "register_register_yandex_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "User",
+                "type": "object",
+                "default": {
+                  "login": "mburdonos@mail.ru"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Статус создания пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login/yandex": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Вход пользователя по профилю в яндекс",
+        "description": "Аутентификация пользователя  по профилю в яндекс. Перебрасывает на ресурс, где пользователь подтверждает свой логин, затем возвращает токены",
+        "operationId": "register_login_yandex_post",
+        "responses": {
+          "200": {
+            "description": "Возвращает словарь из access and refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
           "Login"
         ],
         "summary": "Вход пользователя",
-        "description": "Аутентификация пользователя",
+        "description": "Аутентификация пользователя, возможна по логину или почте",
         "operationId": "register_login_post",
         "requestBody": {
           "content": {
