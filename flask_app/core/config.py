@@ -16,8 +16,8 @@ class Config(BaseSettings):
 
     secret_key: str = Field(env="secret_key", default="super-secret")
 
-    yandex_client_id = Field(env="yandex_client_id")
-    yandex_client_secret = Field(env="yandex_client_secret")
+    yandex_client_id = Field(env="yandex_client_id", default="f8245e9978a845029fa7a5da6cce173c")
+    yandex_client_secret = Field(env="yandex_client_secret", default="46048de4828c4f0eb6b594fa03f84d20")
     yandex_baseurl = Field(env="yandex_baseurl", default=r"https://oauth.yandex.ru/")
     yandex_info_url = Field(env="yandex_baseurl", default=r"https://login.yandex.ru/")
 

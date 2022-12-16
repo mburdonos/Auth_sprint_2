@@ -1,5 +1,8 @@
 # Проектная работа 7 спринта
 
+У меня создавались миграции в https://github.com/mburdonos/Auth_sprint_2/blob/master/flask_app/entrypoint.sh
+Почему так нельзя было?
+
 Сервис аутентификации: https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app
 
 стркутура: точки запроса https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app/api/v1 базовые настройки https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app/core класс и методы по взаимодействиб с бд(postgresql) https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app/db модели БД https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app/models тесты https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app/tests полезные функции, вынесенные отдельно https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app/utils
