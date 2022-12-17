@@ -15,5 +15,7 @@ class UserRole(PostgresBd, db.Model):
         unique=True,
         nullable=False,
     )
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"))
+    user_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("users.id", ondelete="CASCADE")
+    )
     role_id = db.Column(UUID(as_uuid=True), db.ForeignKey("roles.id"))

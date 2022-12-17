@@ -15,7 +15,7 @@ class Permissions(PostgresBd, db.Model):
         unique=True,
         nullable=False,
     )
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
 
     def __repr__(self):
         return f"<Permission {self.name}>"

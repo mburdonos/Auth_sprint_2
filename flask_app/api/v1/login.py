@@ -3,8 +3,7 @@ from json import loads
 from urllib.parse import urlencode
 
 from flask import Blueprint, jsonify, redirect, request
-from flask_jwt_extended import (get_jwt_identity, jwt_required,
-                                unset_jwt_cookies)
+from flask_jwt_extended import get_jwt_identity, jwt_required, unset_jwt_cookies
 from requests import get, post
 
 from core.cache_conf import cache_client
@@ -101,14 +100,12 @@ def log_in_source():
                 refresh_token=return_data.get("refresh_token"),
             )
         return jsonify({"msg": "User not found"}), HTTPStatus.UNAUTHORIZED
-    else:
-        return redirect(
-            configs.yandex_baseurl
-            + "authorize?response_type=code&client_id={}".format(
-                configs.yandex_client_id
-            )
-        )
-        # return configs.yandex_baseurl + "authorize?response_type=code&client_id={}".format(configs.yandex_client_id)
+
+    return redirect(
+        configs.yandex_baseurl
+        + "authorize?response_type=code&client_id={}".format(configs.yandex_client_id)
+    )
+    # return configs.yandex_baseurl + "authorize?response_type=code&client_id={}".format(configs.yandex_client_id)
 
 
 @login.route("/logout", methods=["POST"])
@@ -157,3 +154,11 @@ def change_pass_word():
         response = jsonify({"msg": "change password successful"})
         return response, HTTPStatus.OK
     return jsonify({"msg": "entered data is not correct"}), HTTPStatus.UNAUTHORIZED
+
+
+@login.route("/compare_permission", methods=["GET", "POST"])
+@jwt_required()
+def compare_permission():
+    user_name = get_jwt_identity()
+    user_info = loads(cache_client.get(user_name))
+    return jsonify(user_info)

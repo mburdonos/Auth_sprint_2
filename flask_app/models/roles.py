@@ -15,7 +15,7 @@ class Roles(PostgresBd, db.Model):
         unique=True,
         nullable=False,
     )
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     user = db.relationship("Users", secondary="user_role", lazy="dynamic")
     permission = db.relationship(
         "Permissions", secondary="role_permission", lazy="dynamic"

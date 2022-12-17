@@ -1,5 +1,43 @@
 version: '3'
 services:
+  movies_elasticsearch:
+    image: elasticsearch:7.17.6
+    container_name: movies_elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./src/database:/usr/share/elasticsearch/data
+    restart: always
+
+  movies_redis:
+    container_name: movies_redis
+    image: redis
+    hostname: movies_redis
+    restart: always
+
+  movies_api:
+    container_name: movies_api
+    build:
+      context: ./src/
+      dockerfile: DockerFile
+    hostname: movies_api
+    volumes:
+      - ./src:/app
+    depends_on:
+      - movies_elasticsearch
+      - movies_redis
+    restart: always
+
   auth_db:
     image: postgres:13
     restart: always
@@ -37,6 +75,7 @@ services:
       - ./nginx/configs:/etc/nginx/conf.d:ro
     depends_on:
       - auth_api
+      - movies_api
     ports:
       - "80:80"
     restart: always

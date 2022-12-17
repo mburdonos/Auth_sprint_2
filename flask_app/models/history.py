@@ -41,4 +41,4 @@ class History(PostgresBd, db.Model):
     )
     device_id = db.Column(UUID(as_uuid=True), db.ForeignKey("devices.id"))
     datetime_login = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    user_device_type = db.Column(db.Text, primary_key=True)
+    user_device_type = db.Column(db.String(25), primary_key=True)

@@ -15,11 +15,13 @@ class SocialAccount(PostgresBd, db.Model):
         unique=True,
         nullable=False,
     )
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     user = db.relationship("Users", backref=db.backref("social_accounts", lazy=True))
-
-    # social_id = db.Column(db.Text, nullable=False)
-    social_name = db.Column(db.Text, nullable=False)
+    social_name = db.Column(db.String(50), nullable=False)
 
     __table_args__ = (db.UniqueConstraint("user_id", "social_name", name="social_pk"),)
 

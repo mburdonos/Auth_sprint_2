@@ -20,11 +20,11 @@ class Users(PostgresBd, db.Model):
         unique=True,
         nullable=False,
     )
-    login = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, unique=True, nullable=False)
-    first_name = db.Column(db.String, nullable=True)
-    last_name = db.Column(db.String, nullable=True)
+    login = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    first_name = db.Column(db.String(255), nullable=True)
+    last_name = db.Column(db.String(255), nullable=True)
     is_superuser = db.Column(db.Boolean, default=False, nullable=False)
     device = db.relationship("Devices", secondary="history", lazy="dynamic")
     role = db.relationship("Roles", secondary="user_role", lazy="dynamic")

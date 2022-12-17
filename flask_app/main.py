@@ -20,19 +20,18 @@ from models.users import Users
 from utils.jaeger import configure_tracer
 from utils.roles_utils import create_base_permissions, create_base_roles
 
-configure_tracer()
-
 app = Flask(__name__)
-
-FlaskInstrumentor().instrument_app(app)
 app.app_context().push()
 
+if configs.enable_tracer:
+    configure_tracer()
+    FlaskInstrumentor().instrument_app(app)
 
-@app.before_request
-def before_request():
-    request_id = request.headers.get("X-Request-Id")
-    if not request_id:
-        raise RuntimeError("request id is required")
+    @app.before_request
+    def before_request():
+        request_id = request.headers.get("X-Request-Id")
+        if not request_id:
+            raise RuntimeError("request id is required")
 
 
 init_storage(app)
@@ -69,7 +68,6 @@ def main():
     create_base_permissions()
     create_base_roles()
 
-    # app.run(debug=configs.debug)
     app.run(debug=configs.debug, host="0.0.0.0")
     http_server = WSGIServer(("", 5000), app)
     http_server.serve_forever()

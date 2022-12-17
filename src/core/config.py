@@ -7,6 +7,15 @@ from core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
+guest = [
+    "/api/v1/movies/films",
+    "/api/v1/movies/films/search",
+    "/api/v1/movies/genres",
+    "/api/v1/movies/genres/search",
+    "/api/v1/movies/persons",
+    "/api/v1/movies/persons/search",
+]
+url_compare_permission = "http://auth_api:5000/api/v1/auth/compare_permission"
 
 class Config(BaseSettings):
     """Основные настройки проекта - подключения к другим сервисам и прочее."""
