@@ -1,4 +1,4 @@
-# Проектная работа 7 спринта
+# Сервис авторизации посредством jwt token на flask.
 
 Сервис аутентификации: https://github.com/mburdonos/Auth_sprint_2/tree/master/flask_app
 
